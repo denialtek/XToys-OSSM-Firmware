@@ -30,15 +30,16 @@ const char* FIRMWARE_VERSION = "v1.0";
 
 #define SERVICE_UUID                "e556ec25-6a2d-436f-a43d-82eab88dcefd"
 
+#define CONTROL_CHARACTERISTIC_UUID "c4bee434-ae8f-4e67-a741-0607141f185b"
 // WRITE
 // T-Code messages in the format:
 // ex. L1I99 = move linear actuator to the 99% position
-// ex. L10 = move linear actuator to the 0% position
+// ex. L1I0 = move linear actuator to the 0% position
 // DSTOP = stop
 // DENABLE = enable motor (non-standard T-Code command)
 // DDISABLE = disable motor (non-standard T-Code command)
-#define CONTROL_CHARACTERISTIC_UUID "c4bee434-ae8f-4e67-a741-0607141f185b"
 
+#define SETTINGS_CHARACTERISTIC_UUID "fe9a02ab-2713-40ef-a677-1716f2c03bad"
 // WRITE
 // Preferences in the format:
 // minSpeed:200 = set minimum speed of half-stroke to 200ms (used by XToys client)
@@ -48,7 +49,6 @@ const char* FIRMWARE_VERSION = "v1.0";
 // READ
 // Returns all preference values in the format:
 // minSpeed:200,maxSpeed:2000,maxOut:0,maxIn:1000
-#define SETTINGS_CHARACTERISTIC_UUID "fe9a02ab-2713-40ef-a677-1716f2c03bad"
 
 // Global Variables - Bluetooth
 BLEServer *pServer;
@@ -80,7 +80,7 @@ void updateSettingsCharacteristic();
 void processCommand(std::string msg);
 void moveTo(int targetPosition, int targetDuration);
 
-
+// Received request to update a setting
 class SettingsCharacteristicCallback : public BLECharacteristicCallbacks {
   void onWrite(BLECharacteristic *characteristic) {
     std::string msg = characteristic->getValue();
@@ -116,6 +116,7 @@ class SettingsCharacteristicCallback : public BLECharacteristicCallbacks {
   }
 };
 
+// Received T-Code command
 class ControlCharacteristicCallback : public BLECharacteristicCallbacks {
   void onWrite(BLECharacteristic *characteristic) {
     std::string msg = characteristic->getValue();
@@ -165,6 +166,7 @@ class ControlCharacteristicCallback : public BLECharacteristicCallbacks {
   }
 };
 
+// Read actions and numeric values from T-Code command
 void processCommand(std::string msg) {
   
   char command = NULL;
@@ -237,6 +239,7 @@ void processCommand(std::string msg) {
   }
 }
 
+// Move stepper to requested position
 // targetPosition = value between 0 and 99999 from T-Code command
 // targetDuration = how quickly to move to targetPosition (in ms)
 void moveTo(int targetPosition, int targetDuration) {
@@ -259,11 +262,13 @@ void moveTo(int targetPosition, int targetDuration) {
   logMotion(targetStepperPosition, targetDuration);
 }
 
+// Update value readable from Settings characteristic
 void updateSettingsCharacteristic() {
   String settingsInfo = String("maxIn:") + maxInPosition + ",maxOut:" + maxOutPosition + ",maxSpeed:" + maxSpeed + ",minSpeed:" + minSpeed;
   settingsCharacteristic->setValue(settingsInfo.c_str());
 }
 
+// Log stepper motion event
 void logMotion(int targetPosition, int targetDuration) {
   Serial.print("Moving to position ");
   Serial.print(targetPosition);
@@ -273,6 +278,7 @@ void logMotion(int targetPosition, int targetDuration) {
   Serial.println("------");
 }
 
+// Client connected to OSSM over BLE
 class ServerCallbacks: public BLEServerCallbacks {
   void onConnect(BLEServer* pServer) {
     deviceConnected = true;
@@ -286,6 +292,7 @@ class ServerCallbacks: public BLEServerCallbacks {
     stepper->stopMove();
   }
 };
+
 
 void setup()
 {
@@ -372,6 +379,7 @@ void setup()
   Serial.println("OSSM is now ready");
 }
 
+// Wait for stepper to get to target position and then start move to next position if queue has any additional commands
 void loop()
 {
   if (pendingCommands.size() > 0 && stepper->getCurrentPosition() == targetStepperPosition) {
