@@ -1,4 +1,6 @@
 # OSSM Firmware for XToys
+Firmware for use with the OSSM (Open Source Sex Machine) by KinkyMakers.
+[https://github.com/KinkyMakers/OSSM-hardware](https://github.com/KinkyMakers/OSSM-hardware)
 
 ## Setting Up
 1. Download the [OSSM-BLE.ino](https://github.com/denialtek/xtoys-ossm-firmware/blob/main/OSSM-BLE.ino) file.
