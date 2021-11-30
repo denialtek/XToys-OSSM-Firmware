@@ -33,8 +33,8 @@ const char* FIRMWARE_VERSION = "v1.0";
 #define CONTROL_CHARACTERISTIC_UUID "c4bee434-ae8f-4e67-a741-0607141f185b"
 // WRITE
 // T-Code messages in the format:
-// ex. L1I99 = move linear actuator to the 99% position
-// ex. L1I0 = move linear actuator to the 0% position
+// ex. L199I100 = move linear actuator to the 99% position over 100ms
+// ex. L10I100 = move linear actuator to the 0% position over 100ms
 // DSTOP = stop
 // DENABLE = enable motor (non-standard T-Code command)
 // DDISABLE = disable motor (non-standard T-Code command)
