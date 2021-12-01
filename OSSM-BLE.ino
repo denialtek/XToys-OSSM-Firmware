@@ -63,6 +63,7 @@ FastAccelStepperEngine engine = FastAccelStepperEngine();
 FastAccelStepper *stepper = NULL;
 int targetStepperPosition = 0;
 bool stepperEnabled = false;
+bool stepperMoving = false;
 
 // Preferences
 Preferences preferences;
@@ -129,19 +130,21 @@ class ControlCharacteristicCallback : public BLECharacteristicCallbacks {
       Serial.println("STOP");
       stepper->stopMove();
       pendingCommands.clear();
-      targetStepperPosition = stepper->getCurrentPosition();
+      stepperMoving = false;
       return;
     } else if (msg == "DENABLE") { // enable stepper motor
       Serial.println("ENABLE");
       stepper->enableOutputs();
       stepper->forceStopAndNewPosition(0);
       pendingCommands.clear();
+      stepperMoving = false;
       stepperEnabled = true;
       return;
     } else if (msg == "DDISABLE") { // disable stepper motor
       Serial.println("DISABLE");
       stepper->disableOutputs();
       pendingCommands.clear();
+      stepperMoving = false;
       stepperEnabled = false;
       return;
     }
@@ -155,14 +158,16 @@ class ControlCharacteristicCallback : public BLECharacteristicCallbacks {
       return;
     }
     // probably a normal movement command, store it to be run after other movement commands are finished
-    if (pendingCommands.size() < 100) {
+    if (!stepperMoving) {
+      processCommand(msg);
+    } else if (pendingCommands.size() < 100) {
       pendingCommands.push_back(msg);
+      Serial.print("# of pending commands: ");
+      Serial.println(pendingCommands.size());
     } else {
       Serial.print("Too many commands in queue. Dropping: ");
       Serial.println(msg.c_str());
     }
-    Serial.print("# of pending commands: ");
-    Serial.println(pendingCommands.size());
   }
 };
 
@@ -258,6 +263,7 @@ void moveTo(int targetPosition, int targetDuration) {
   
   stepper->setSpeedInHz(targetStepperSpeed);
   stepper->moveTo(targetStepperPosition);
+  stepperMoving = true;
   
   logMotion(targetStepperPosition, targetDuration);
 }
@@ -290,6 +296,7 @@ class ServerCallbacks: public BLEServerCallbacks {
     Serial.println("BLE Disconnected");
     pServer->startAdvertising();
     stepper->stopMove();
+    stepperMoving = false;
   }
 };
 
@@ -382,10 +389,14 @@ void setup()
 // Wait for stepper to get to target position and then start move to next position if queue has any additional commands
 void loop()
 {
-  if (pendingCommands.size() > 0 && stepper->getCurrentPosition() == targetStepperPosition) {
-    std::string command = pendingCommands.front();
-    pendingCommands.pop_front();
-    processCommand(command);
+  if (stepper->getCurrentPosition() == targetStepperPosition) {
+    if (pendingCommands.size() > 0) {
+      std::string command = pendingCommands.front();
+      pendingCommands.pop_front();
+      processCommand(command);
+    } else {
+      stepperMoving = false;
+    }
   }
   
   delay(20);
