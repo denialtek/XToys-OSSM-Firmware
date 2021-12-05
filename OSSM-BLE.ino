@@ -9,9 +9,9 @@
 
 const char* FIRMWARE_VERSION = "v1.0";
 
-#define PUL_PIN 4
-#define DIR_PIN 18
-#define ENA_PIN 22
+#define PUL_PIN 14
+#define DIR_PIN 27
+#define ENA_PIN 26
 
 #define DEFAULT_MAX_SPEED 200
 #define DEFAULT_MIN_SPEED 2000
