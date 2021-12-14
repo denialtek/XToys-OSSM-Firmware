@@ -9,9 +9,9 @@
 
 const char* FIRMWARE_VERSION = "v1.0";
 
-#define PUL_PIN 14
-#define DIR_PIN 27
-#define ENA_PIN 26
+#define PUL_PIN 4
+#define DIR_PIN 18
+#define ENA_PIN 22
 
 #define DEFAULT_MAX_SPEED 200
 #define DEFAULT_MIN_SPEED 2000
@@ -249,9 +249,9 @@ void processCommand(std::string msg) {
 // targetDuration = how quickly to move to targetPosition (in ms)
 void moveTo(int targetPosition, int targetDuration) {
 
-  if (pendingCommands.size() > 5) {
-    targetDuration *= 0.7; // if falling behind on pattern make slower strokes faster to catch up
-  }
+  // if (pendingCommands.size() > 5) {
+  //  targetDuration *= 0.7; // if falling behind on pattern make slower strokes faster to catch up
+  // }
 
   int currentStepperPosition = stepper->getCurrentPosition();
 
