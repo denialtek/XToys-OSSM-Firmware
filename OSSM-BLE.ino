@@ -7,7 +7,7 @@
 #include <list>
 #include <Preferences.h>
 
-const char* FIRMWARE_VERSION = "v1.0";
+const char* FIRMWARE_VERSION = "v1.1";
 
 #define PUL_PIN 14
 #define DIR_PIN 27
@@ -62,6 +62,7 @@ BLECharacteristic *softwareVersionCharacteristic;
 FastAccelStepperEngine engine = FastAccelStepperEngine();
 FastAccelStepper *stepper = NULL;
 int targetStepperPosition = 0;
+int remainingCommandTime = 0;
 bool stepperEnabled = false;
 bool stepperMoving = false;
 
@@ -257,6 +258,7 @@ void moveTo(int targetPosition, int targetDuration) {
 
   // convert from (0-10000) to (inPos-outPos) range
   targetStepperPosition = -targetPosition * (maxInPosition - maxOutPosition) / 10000 + maxOutPosition * STEPS_PER_MM;
+  remainingCommandTime = targetDuration;
 
   // steps/s
   int targetStepperSpeed = abs(targetStepperPosition - currentStepperPosition) / (targetDuration / 1000.0);
@@ -389,13 +391,20 @@ void setup()
 // Wait for stepper to get to target position and then start move to next position if queue has any additional commands
 void loop()
 {
-  if (stepper->getCurrentPosition() == targetStepperPosition) {
+  if (stepper->getCurrentPosition() == targetStepperPosition && remainingCommandTime == 0) {
     if (pendingCommands.size() > 0) {
       std::string command = pendingCommands.front();
       pendingCommands.pop_front();
       processCommand(command);
     } else {
       stepperMoving = false;
+    }
+  }
+
+  if (remainingCommandTime > 0) {
+    remainingCommandTime -= 20;
+    if (remainingCommandTime < 0) {
+      remainingCommandTime = 0;
     }
   }
   
