@@ -43,12 +43,12 @@ static endstopProperties endstop = {
   .homeToBack = true,    
   .activeLow = true,          
   .endstopPin = SERVO_ENDSTOP,
-  .pinMode = INPUT
+  .pinMode = INPUT_PULLUP
 };
 
 static sensorlessHomeProperties sensorlessHome = {
   .currentPin = SERVO_SENSORLESS,
-  .currentLimit = 1.5
+  .currentLimit = 1
 };
 
 void homingNotification(bool isHomed) {
@@ -107,12 +107,25 @@ void processCommand(DynamicJsonDocument doc) {
     } else if (action.equals("home")) {
       Stroker.disable();
       String type = command["type"];
-      if (type.equals("auto")) {
-        Stroker.enableAndHome(&endstop, homingNotification);
+
+      if (type.equals("sensor")) {
+        String side = command["side"];
+        if (side == "front") {
+          endstop.homeToBack = true;
+        } else {
+          endstop.homeToBack = false;
+        }
+        Stroker.enableAndHome(&endstop, homingNotification, HOMING_SPEED);
+
       } else if (type.equals("manual")) {
+        float rodLength = command["length"];
+        Stroker.setPhysicalTravel(rodLength);
         Stroker.thisIsHome(HOMING_SPEED);
         homingNotification(true);
+
       } else if (type.equals("sensorless")) {
+        float rodLength = command["length"];
+        Stroker.setPhysicalTravel(rodLength);
         Stroker.enableAndSensorlessHome(&sensorlessHome, homingNotification, HOMING_SPEED);
       }
     
@@ -162,6 +175,10 @@ void processCommand(DynamicJsonDocument doc) {
     } else if (action.equals("setDepth")) {
       float depth = command["depth"];
       Stroker.setDepth(depth / 100.0 * Stroker.getMaxDepth(), true);
+
+    } else if (action.equals("setPhysicalTravel")) {
+      float travel = command["travel"];
+      Stroker.setPhysicalTravel(travel);
 
     // not currently sent by XToys
     } else if (action.equals("setSensation")) {
