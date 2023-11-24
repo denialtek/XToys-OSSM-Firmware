@@ -13,11 +13,14 @@ The firmware can be installed directly from the XToys website via these steps:
 
 # Manual Setup
 
-1. Connect your OSSM via USB cable.
-2. Download and extract the repository.
-3. Install [Visual Studio Code](https://code.visualstudio.com) and the [PlatformIO](https://platformio.org/platformio-ide) extension.
-4. In Visual Studio go to File > Open and select the XToys-OSSM firmware folder.
-5. Open the config.h file (OSSM > src > config.h).
+1. On your OSSM motor set the DIP switches to:  
+![S1=Off, S2=On, S3=On, S4=Off, S6=Off](ossm-dip.png)  
+**Note:** If the dildo is mounted on the left side of the OSSM (the side with the USB port) then flip S6 to ON instead
+2. Connect your OSSM via USB cable.
+3. Download and extract the repository.
+4. Install [Visual Studio Code](https://code.visualstudio.com) and the [PlatformIO](https://platformio.org/platformio-ide) extension.
+5. In Visual Studio go to File > Open and select the XToys-OSSM firmware folder.
+6. Open the config.h file (OSSM > src > config.h).
 
 If you want to use Bluetooth fill out these fields:  
 #define COMPILE_BLUETOOTH true  
