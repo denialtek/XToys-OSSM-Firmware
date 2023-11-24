@@ -7,7 +7,7 @@
 #define SERVO_PULSE       14
 #define SERVO_DIR         27
 #define SERVO_ENABLE      26
-#define SERVO_ENDSTOP     19
+#define SERVO_ENDSTOP     12
 #define SERVO_ALARM       26
 #define SERVO_SENSORLESS  36
 #define PWM               21
