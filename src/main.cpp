@@ -51,12 +51,6 @@ static sensorlessHomeProperties sensorlessHome = {
   .currentLimit = 1.5
 };
 
-void strokeEngineTelemetry(float position, float speed, bool clipping) {
-  /* Serial.println("{\"position\":" + String(position * 10, 1) + 
-    ",\"speed\":" + String(speed, 1) + 
-    ",\"clipping\":" + String(clipping) + "}"); */
-}
-
 void homingNotification(bool isHomed) {
   if (isHomed) {
     Serial.println("Found home - Ready to rumble!");
@@ -273,16 +267,6 @@ void setup() {
 
   // Setup Stroke Engine
   Stroker.begin(&strokingMachine, &servoMotor);
-  Stroker.registerTelemetryCallback(strokeEngineTelemetry);
-
-  // TEMP
-  /* Stroker.thisIsHome();
-  Stroker.startStreaming();
-  Stroker.appendToStreaming(0, 2000);
-  Stroker.appendToStreaming(50, 1000);
-  Stroker.appendToStreaming(0, 1000);
-  Stroker.appendToStreaming(100, 1000);
-  Stroker.appendToStreaming(0, 1000); */
 };
 
 void loop() {
